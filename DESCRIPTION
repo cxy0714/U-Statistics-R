@@ -1,0 +1,37 @@
+Package: ustats
+Type: Package
+Title: R Interface to Python Tools for Higher-Order U-Statistics
+Version: 0.1.0
+Authors@R: c(
+    person("Xingyu", "Chen",
+           email = "xingyuchen0714@sjtu.edu.cn",
+           role = c("aut", "cre")),
+    person("Ruiqi", "Zhang",
+           email = "zrq1706@outlook.com",
+           role = "aut"),
+    person("Lin", "Liu",
+           email = "linliu@sjtu.edu.cn",
+           role = "aut")
+  )
+Description: Provides an R interface to the Python package 'u-stats' for
+    efficient computation of higher-order U-statistics using Einstein
+    summation notation. The package automatically converts R objects to
+    NumPy or PyTorch tensors via 'reticulate' and supports GPU acceleration
+    when PyTorch with CUDA is available. Designed for large-scale statistical
+    estimation where numerical stability and performance are critical.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+    reticulate
+SystemRequirements: Python (>= 3.11)
+Config/reticulate:
+    packages:
+        - u-stats
+        - numpy
+        - torch
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+
+
+

@@ -1,9 +1,4 @@
 
-#'
-#' @author Xingyu Chen
-#' @date 2026-01-23
-
-
 #' Convert Index List to Einstein Summation Notation
 #'
 #' Converts a nested list of index pairs (or single indices) into an
@@ -15,8 +10,7 @@
 #' Each unique numeric index is mapped to a lowercase letter in alphabetical
 #' order. A maximum of 26 unique indices is supported.
 #'
-#' @param expr_list A list of numeric vectors. Each element must be of length
-#'   1 (rank-1 tensor) or 2 (rank-2 tensor).
+#' @param expr_list A list of numeric vectors.
 #'
 #' @return A character string representing the Einstein summation expression.
 #'
@@ -112,12 +106,11 @@ expr_list_to_einstein <- function(expr_list) {
 #' ustat(list(H1, H2), "ab,bc->", dtype = NULL)  # auto precision
 #' }
 #' @export
-
 ustat <- function(tensors,
-                   expression,
-                   backend = c("torch", "numpy"),
-                   average = TRUE,
-                   dtype = NULL) {
+                  expression,
+                  backend = c("torch", "numpy"),
+                  average = TRUE,
+                  dtype = NULL) {
 
   if (!check_python_env()) {
     stop(

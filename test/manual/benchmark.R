@@ -3,38 +3,67 @@ devtools::load_all()
 library(ustats)
 library(reticulate)
 
-cat("==== ustats GPU Benchmark ====\n\n")
+# use_condaenv("r_env", required = TRUE)
+# If the condaenv already exist and have python
 
-setup_ustats(method = "conda", envname = "r-ustats", restart = TRUE, persist = TRUE)
+# Manually trigger Python initialization once so py_available can detect it
+py_config() # or import("sys")$version, etc.
+
+cat("==== ustats Benchmark ====\n\n")
+
+# setup_ustats()
 check_ustats_setup()
 
 torch <- import("torch")
 cat("Torch CUDA available:", torch$cuda$is_available(), "\n\n")
 
+
+# -------------------------------------------------
+# Generate test data
+# -------------------------------------------------
 set.seed(1)
 
-# -------------------------------------------------
-# 构造测试数据（可以调大 n 测压力）
-# -------------------------------------------------
-n <- 400   # GPU 可以试 8000 / 10000
+n <- 4000
 cat("Matrix size:", n, "x", n, "\n\n")
 
-H1 <- matrix(rnorm(n * n), n, n)
+H1 <- rnorm(n)
 H2 <- matrix(rnorm(n * n), n, n)
-H3 <- matrix(rnorm(n * n), n, n)
+H3 <- rnorm(n)
+tensors <- list(H1, H2, H2, H3)
+expr <- "a,ab,bc,c->"
 
-expr <- "ab,bc,cd->"
+# -------------------------------------------------
+# Direct calculation of the ground truth value.
+# -------------------------------------------------
+
+A <- sweep(H2, 1, H1, "*")
+AA <- sweep(H2, 2, H3, "*")
+diag(A) <- 0
+diag(AA) <- 0
+AAA <- A %*% AA
+true <- (sum(AAA) - sum(diag(AAA))) / (n * (n - 1) * (n - 2))
+
+# -------------------------------------------------
+# Warm up for torch
+# -------------------------------------------------
+
+ustat(
+  tensors = tensors,
+  expression = expr,
+  backend = "torch",
+  dtype = NULL # auto float32(GPU) / float64(CPU)
+)
 
 # -------------------------------------------------
 # Torch (auto → GPU if available)
 # -------------------------------------------------
 cat("Running Torch backend (auto dtype)...\n")
 t1 <- system.time({
-  res_torch_gpu <- ustats(
-    tensors = list(H1, H2, H3),
+  res_torch_gpu <- ustat(
+    tensors = tensors,
     expression = expr,
     backend = "torch",
-    dtype = NULL   # 自动 float32(GPU) / float64(CPU)
+    dtype = NULL # auto float32(GPU) / float64(CPU)
   )
 })
 print(t1)
@@ -45,8 +74,8 @@ cat("Result (torch auto):", res_torch_gpu, "\n\n")
 # -------------------------------------------------
 cat("Running Torch backend (CPU float64)...\n")
 t2 <- system.time({
-  res_torch_cpu <- ustats(
-    tensors = list(H1, H2, H3),
+  res_torch_cpu <- ustat(
+    tensors = tensors,
     expression = expr,
     backend = "torch",
     dtype = "float64"
@@ -60,8 +89,8 @@ cat("Result (torch cpu):", res_torch_cpu, "\n\n")
 # -------------------------------------------------
 cat("Running NumPy backend (float64)...\n")
 t3 <- system.time({
-  res_numpy <- ustats(
-    tensors = list(H1, H2, H3),
+  res_numpy <- ustat(
+    tensors = tensors,
     expression = expr,
     backend = "numpy",
     dtype = "float64"
@@ -71,12 +100,12 @@ print(t3)
 cat("Result (numpy):", res_numpy, "\n\n")
 
 # -------------------------------------------------
-# 数值差异对比
+# Numerical difference comparison
 # -------------------------------------------------
 cat("==== Result Differences ====\n")
-cat("torch(GPU) vs torch(CPU):", abs(res_torch_gpu - res_torch_cpu), "\n")
-cat("torch(GPU) vs numpy     :", abs(res_torch_gpu - res_numpy), "\n")
-cat("torch(CPU) vs numpy     :", abs(res_torch_cpu - res_numpy), "\n")
+cat("torch(auto_dection) vs true:", abs(res_torch_gpu - true), "\n")
+cat("torch(float64) vs true:", abs(res_torch_cpu - true), "\n")
+cat("numpy vs true:", abs(res_numpy - true), "\n")
 
 cat("\n==== Speed Summary (seconds) ====\n")
 print(rbind(

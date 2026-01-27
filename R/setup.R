@@ -1,16 +1,14 @@
 #' Python Environment Setup Utilities for ustats
 #'
 #' Helper functions for configuring and verifying the Python environment
-#' required by \code{ustats()}.
+#' required by \code{ustat()}.
 #'
 #' These functions install and validate Python dependencies including
 #' \code{u_stats}, \code{numpy}, and \code{torch} (recommended for numerical
 #' stability and performance).
 #'
 #' @author Xingyu Chen
-#' @date 2026-01-23
-NULL
-ustats_env <- new.env(parent = emptyenv())
+
 
 #' Check Python and u_stats availability
 #'
@@ -49,7 +47,7 @@ check_python_env <- function() {
 #' Set Up Python Environment for ustats
 #'
 #' Installs and configures the Python environment required to run
-#' \code{ustats()}, including \code{u_stats}, \code{numpy}, and
+#' \code{ustat()}, including \code{u_stats}, \code{numpy}, and
 #' \code{torch}.
 #'
 #' \strong{Note:} PyTorch is strongly recommended. The NumPy backend is slower
@@ -71,7 +69,7 @@ check_python_env <- function() {
 #'
 #' @examples
 #' \dontrun{
-#' setup_ustats()
+#' setup_ustat()
 #' setup_ustats(method = "conda", envname = "ustats-env")
 #' }
 #' @export
@@ -103,12 +101,12 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
 
   } else if (method == "virtualenv") {
     message("Creating virtualenv: ", envname)
-    reticulate::virtualenv_create(envname)
+    reticulate::virtualenv_create(envname, version = ">=3.11")
     reticulate::use_virtualenv(envname, required = TRUE)
 
   } else if (method == "conda") {
     message("Creating conda environment: ", envname)
-    reticulate::conda_create(envname)
+    conda_create(envname, python_version = "3.11")
     reticulate::use_condaenv(envname, required = TRUE)
 
   } else if (method == "system") {
@@ -152,7 +150,7 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
       message("⚠ PyTorch not detected — computations may be slower and less stable")
     }
 
-    message("\n🎉 Setup complete! You can now call ustats().")
+    message("\n🎉 Setup complete! You can now call ustat().")
 
   } else {
     warning("Verification failed. A restart may be required.", call. = FALSE)
@@ -237,7 +235,7 @@ persist_project_config <- function() {
     lines,
     "",
     "# === ustats configuration: persistent Python environment ===",
-    paste0("# Added by setup_ustats() on ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
+    paste0("# Added by setup_ustat() on ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
     sprintf('Sys.setenv(RETICULATE_PYTHON = "%s")', py_path),
     "# This ensures reticulate uses the dedicated environment for ustats (with torch, etc.)",
     "# To change or disable: comment out or delete this line",
@@ -253,7 +251,7 @@ persist_project_config <- function() {
 
 #' Check ustats Python Environment Status
 #'
-#' Reports whether Python and required modules for \code{ustats()} are available.
+#' Reports whether Python and required modules for \code{ustat()} are available.
 #'
 #' @return Invisibly returns TRUE if environment is ready
 #'
@@ -269,7 +267,7 @@ check_ustats_setup <- function() {
 
   if (!py_ok) {
     message("✗ Python not available")
-    message("Run setup_ustats() to install dependencies.")
+    message("Run setup_ustat() to install dependencies.")
     return(invisible(FALSE))
   }
 
@@ -300,7 +298,7 @@ check_ustats_setup <- function() {
   } else if (basic_ok) {
     message("✓ Basic environment ready, but Torch is strongly recommended")
   } else {
-    message("✗ Setup incomplete. Run setup_ustats().")
+    message("✗ Setup incomplete. Run setup_ustat().")
   }
 
   invisible(full_ok)

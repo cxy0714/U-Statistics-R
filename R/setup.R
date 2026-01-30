@@ -69,7 +69,7 @@ check_python_env <- function() {
 #'
 #' @examples
 #' \dontrun{
-#' setup_ustat()
+#' setup_ustats()
 #' setup_ustats(method = "conda", envname = "ustats-env")
 #' }
 #' @export
@@ -235,7 +235,7 @@ persist_project_config <- function() {
     lines,
     "",
     "# === ustats configuration: persistent Python environment ===",
-    paste0("# Added by setup_ustat() on ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
+    paste0("# Added by setup_ustats() on ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
     sprintf('Sys.setenv(RETICULATE_PYTHON = "%s")', py_path),
     "# This ensures reticulate uses the dedicated environment for ustats (with torch, etc.)",
     "# To change or disable: comment out or delete this line",
@@ -267,7 +267,7 @@ check_ustats_setup <- function() {
 
   if (!py_ok) {
     message("✗ Python not available")
-    message("Run setup_ustat() to install dependencies.")
+    message("Run setup_ustats() to install dependencies.")
     return(invisible(FALSE))
   }
 
@@ -298,7 +298,7 @@ check_ustats_setup <- function() {
   } else if (basic_ok) {
     message("✓ Basic environment ready, but Torch is strongly recommended")
   } else {
-    message("✗ Setup incomplete. Run setup_ustat().")
+    message("✗ Setup incomplete. Run setup_ustats().")
   }
 
   invisible(full_ok)

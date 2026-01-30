@@ -41,7 +41,7 @@ and may be numerically less stable for higher-order U-statistics.
 }
 \examples{
 \dontrun{
-setup_ustat()
+setup_ustats()
 setup_ustats(method = "conda", envname = "ustats-env")
 }
 }

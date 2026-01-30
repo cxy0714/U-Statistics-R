@@ -50,8 +50,8 @@ The U-statistic structure can be specified using either:
 }
 
 This function requires a working Python environment with the
-\code{u_stats} package installed. Use \code{setup_ustat()} to install
-dependencies and \code{check_ustat_setup()} to verify configuration.
+\code{u_stats} package installed. Use \code{setup_ustats()} to install
+dependencies and \code{check_ustats_setup()} to verify configuration.
 
 R numeric objects are converted to NumPy arrays using the selected
 precision. If Python tensors (e.g., Torch tensors) are supplied directly,
@@ -59,7 +59,7 @@ they are passed through unchanged.
 }
 \examples{
 \dontrun{
-setup_ustat()
+setup_ustats()
 
 v1 <- runif(100)
 H1 <- matrix(runif(100), 10, 10)

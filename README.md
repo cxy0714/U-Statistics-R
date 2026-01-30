@@ -10,7 +10,7 @@ This package accompanies our paper:
 
 > [Xingyu Chen, Ruiqi Zhang, Lin Liu. On computing and the complexity of computing higher-order U-statistics, exactly.arXiv preprint arXiv:2508.12627, 2025.](https://arxiv.org/abs/2508.12627)  
 
-The underlying Python implementation is available in `PyPi` named also [`ustats`](https://github.com/zrq1706/U-Statistics-python/tree/main)
+The underlying Python implementation is available in `PyPi` named also [`u-stats-python`](https://github.com/zrq1706/U-Statistics-python/tree/main)
 :
 
 This R package is a lightweight interface built using `reticulate` to call this backend efficiently.

@@ -1,4 +1,4 @@
-devtools::load_all()
+devtools::install_github("cxy0714/U-Statistics-R")
 
 library(ustats)
 library(reticulate)
@@ -35,13 +35,18 @@ expr <- "a,ab,bc,c->"
 # -------------------------------------------------
 # Direct calculation of the ground truth value.
 # -------------------------------------------------
-
+cat("Direct calculation without ustat() \n")
+t0 <- system.time({
 A <- sweep(H2, 1, H1, "*")
 AA <- sweep(H2, 2, H3, "*")
 diag(A) <- 0
 diag(AA) <- 0
 AAA <- A %*% AA
 true <- (sum(AAA) - sum(diag(AAA))) / (n * (n - 1) * (n - 2))
+})
+print(t0)
+cat("Result (Direct calculation):", true, "\n\n")
+
 
 # -------------------------------------------------
 # Warm up for torch
@@ -87,17 +92,17 @@ cat("Result (torch cpu):", res_torch_cpu, "\n\n")
 # -------------------------------------------------
 # NumPy float64
 # -------------------------------------------------
-cat("Running NumPy backend (float64)...\n")
-t3 <- system.time({
-  res_numpy <- ustat(
-    tensors = tensors,
-    expression = expr,
-    backend = "numpy",
-    dtype = "float64"
-  )
-})
-print(t3)
-cat("Result (numpy):", res_numpy, "\n\n")
+# cat("Running NumPy backend (float64)...\n")
+# t3 <- system.time({
+#   res_numpy <- ustat(
+#     tensors = tensors,
+#     expression = expr,
+#     backend = "numpy",
+#     dtype = "float64"
+#   )
+# })
+# print(t3)
+# cat("Result (numpy):", res_numpy, "\n\n")
 
 # -------------------------------------------------
 # Numerical difference comparison
@@ -105,13 +110,14 @@ cat("Result (numpy):", res_numpy, "\n\n")
 cat("==== Result Differences ====\n")
 cat("torch(auto_dection) vs true:", abs(res_torch_gpu - true), "\n")
 cat("torch(float64) vs true:", abs(res_torch_cpu - true), "\n")
-cat("numpy vs true:", abs(res_numpy - true), "\n")
+# cat("numpy vs true:", abs(res_numpy - true), "\n")
 
 cat("\n==== Speed Summary (seconds) ====\n")
 print(rbind(
+  direct = t0[3],
   torch_auto = t1[3],
-  torch_cpu  = t2[3],
-  numpy      = t3[3]
+  torch_cpu  = t2[3]
+  # numpy      = t3[3]
 ))
 
 cat("\nDone.\n")

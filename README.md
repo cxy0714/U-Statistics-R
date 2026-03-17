@@ -76,12 +76,13 @@ H3 <- rnorm(n)
 tensors <- list(H1, H2, H2, H3)
 expr <- "a,ab,bc,c->"
 
-ustat(
+result <- ustat(
   tensors = tensors,
   expression = expr,
   backend = "torch",
   dtype = NULL  # auto float32(GPU) / float64(CPU)
 )
+print(result)
 
 ```
 

@@ -76,7 +76,7 @@ H3 <- rnorm(n)
 tensors <- list(H1, H2, H2, H3)
 expr <- "a,ab,bc,c->"
 
-ustats(
+ustat(
   tensors = tensors,
   expression = expr,
   backend = "torch",

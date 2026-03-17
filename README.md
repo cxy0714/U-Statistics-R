@@ -17,7 +17,7 @@ This R package is a lightweight interface built using `reticulate` to call this 
 
 ---
 
-##  Installation (Current)
+##  Installation 
 
 This package is not yet on CRAN. Install locally:
 

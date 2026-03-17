@@ -51,7 +51,7 @@ check_ustats_setup()
 
 
 ```r
-devtools::load_all()
+devtools::install_github("cxy0714/U-Statistics-R")
 
 library(ustats)
 library(reticulate)

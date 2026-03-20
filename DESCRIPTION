@@ -1,7 +1,7 @@
 Package: ustats
 Type: Package
 Title: R Interface to Python Tools for Computing Higher-Order U-Statistics
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: c(
     person("Xingyu", "Chen",
            email = "xingyuchen0714@sjtu.edu.cn",

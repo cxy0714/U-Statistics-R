@@ -28,7 +28,7 @@ will be skipped on CRAN check servers where Python is not available.
 The thread count has been limited via OMP_NUM_THREADS, OPENBLAS_NUM_THREADS,
 and MKL_NUM_THREADS to reduce this ratio.
 
-## Changes made during pre-submission checks (rhub + CRAN incoming)
+## Changes made during pre-submission checks (rhub )
 
 * Removed non-ASCII characters (Unicode symbols and emoji) from R/setup.R
   and R/ustat.R

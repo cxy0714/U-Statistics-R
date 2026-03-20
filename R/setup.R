@@ -90,6 +90,19 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
       py_config <- reticulate::py_config()
       message("[OK] Found existing Python: ", py_config$python)
     } else {
+      # Must ask user before installing anything on their system (CRAN policy)
+      if (!interactive()) {
+        stop(
+          "No Python found and session is non-interactive. ",
+          "Please install Python manually, then call setup_ustats() again.",
+          call. = FALSE
+        )
+      }
+      ans <- readline("No Python found. Install Miniconda now? [y/N]: ")
+      if (!tolower(trimws(ans)) %in% c("y", "yes")) {
+        message("Aborted. Please install Python manually and try again.")
+        return(invisible(FALSE))
+      }
       message("Installing Miniconda (may take a few minutes)...")
       tryCatch({
         reticulate::install_miniconda()
@@ -98,7 +111,6 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
         stop("Failed to install Miniconda: ", e$message, call. = FALSE)
       })
     }
-
   } else if (method == "virtualenv") {
     message("Creating virtualenv: ", envname)
     reticulate::virtualenv_create(envname, version = ">=3.11")

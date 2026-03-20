@@ -86,5 +86,3 @@ print(result)
 
 ```
 
-Also see a benchmarking example script here:  
-[`test/manual/benchmark.R`](test/manual/benchmark.R)

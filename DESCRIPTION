@@ -21,7 +21,6 @@ Description: Provides an R interface to the Python package 'u-stats' for
     estimation where numerical stability and performance are critical.
 License: MIT + file LICENSE
 Encoding: UTF-8
-LazyData: true
 Imports:
     reticulate
 SystemRequirements: Python (>= 3.11)

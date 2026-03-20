@@ -1,3 +1,8 @@
+## Resubmission (0.1.2)
+
+* Quoted all software names in DESCRIPTION ('NumPy', 'PyTorch', 'CUDA')
+  as requested by CRAN reviewer Uwe Ligges.
+  
 ## Test environments
 
 * Windows (R-devel, x86_64-w64-mingw32) via rhub

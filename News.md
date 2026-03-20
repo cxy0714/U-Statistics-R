@@ -1,3 +1,8 @@
+# ustats 0.1.2
+
+* Quoted software names ('NumPy', 'PyTorch', 'CUDA') in DESCRIPTION
+  per CRAN policy.
+
 # ustats 0.1.1
 
 * Minor improvements and CRAN compliance fixes.

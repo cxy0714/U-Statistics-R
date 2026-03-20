@@ -1,3 +1,10 @@
+## Resubmission (0.1.3)
+
+* Fixed NEWS.md filename casing (News.md -> NEWS.md) which caused a
+  "Non-standard file/directory found at top level" NOTE on CRAN's
+  Linux check servers.
+
+
 ## Resubmission (0.1.2)
 
 * Quoted all software names in DESCRIPTION ('NumPy', 'PyTorch', 'CUDA')

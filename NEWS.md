@@ -1,3 +1,7 @@
+# ustats 0.1.3
+
+* Fixed NEWS.md filename casing (News.md -> NEWS.md).
+
 # ustats 0.1.2
 
 * Quoted software names ('NumPy', 'PyTorch', 'CUDA') in DESCRIPTION

@@ -30,6 +30,8 @@ Config/reticulate:
         - u-stats
         - numpy
         - torch
+Suggests:
+    rstudioapi      
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 

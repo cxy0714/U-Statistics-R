@@ -3,5 +3,6 @@
 #' A dedicated environment for storing ustats package state,
 #' such as Python availability checks. Parent is emptyenv() for isolation.
 #'
+#' @importFrom stats setNames
 #' @keywords internal
 ustats_env <- new.env(parent = emptyenv())

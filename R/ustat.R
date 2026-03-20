@@ -147,7 +147,7 @@ ustat <- function(tensors,
   np <- reticulate::import("numpy", convert = FALSE)
 
   # ==========================================================
-  # 🔢 DTYPE AUTO-SELECTION
+  # DTYPE AUTO-SELECTION
   # ==========================================================
   if (!is.null(dtype)) {
     if (!dtype %in% c("float32", "float64")) {
@@ -156,7 +156,7 @@ ustat <- function(tensors,
     np_dtype <- dtype
 
   } else {
-    # Auto নির্বাচন
+    # Auto-select dtype
     if (backend == "torch") {
       torch <- reticulate::import("torch", convert = FALSE)
       use_cuda <- FALSE
@@ -172,7 +172,7 @@ ustat <- function(tensors,
   }
 
   # ==========================================================
-  # 🔁 Expression auto-conversion
+  # Expression auto-conversion
   # ==========================================================
   if (is.list(expression)) {
 
@@ -193,7 +193,7 @@ ustat <- function(tensors,
   }
 
   # ==========================================================
-  # 🔁 Tensor auto-conversion
+  # Tensor auto-conversion
   # ==========================================================
   tensors <- lapply(tensors, function(x) {
 
@@ -215,7 +215,7 @@ ustat <- function(tensors,
   })
 
   # ==========================================================
-  # 🚀 Call Python ustat
+  #  Call Python ustat
   # ==========================================================
   result <- tryCatch({
     ustat_mod$ustat(

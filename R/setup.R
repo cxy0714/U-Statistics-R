@@ -88,12 +88,12 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
   if (method == "auto") {
     if (reticulate::py_available(initialize = FALSE)) {
       py_config <- reticulate::py_config()
-      message("✓ Found existing Python: ", py_config$python)
+      message("[OK] Found existing Python: ", py_config$python)
     } else {
       message("Installing Miniconda (may take a few minutes)...")
       tryCatch({
         reticulate::install_miniconda()
-        message("✓ Miniconda installed")
+        message("[OK] Miniconda installed")
       }, error = function(e) {
         stop("Failed to install Miniconda: ", e$message, call. = FALSE)
       })
@@ -106,14 +106,14 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
 
   } else if (method == "conda") {
     message("Creating conda environment: ", envname)
-    conda_create(envname, python_version = "3.11")
+    reticulate::conda_create(envname, python_version = "3.11")
     reticulate::use_condaenv(envname, required = TRUE)
 
   } else if (method == "system") {
     if (!reticulate::py_available(initialize = TRUE)) {
       stop("System Python not found. Please install Python first.", call. = FALSE)
     }
-    message("✓ Using system Python")
+    message("[OK] Using system Python")
   }
 
   # ----------------------------------------------------------
@@ -125,7 +125,7 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
 
   tryCatch({
     reticulate::py_install(required_pkgs, pip = TRUE)
-    message("✓ Installed: ", paste(required_pkgs, collapse = ", "))
+    message("[OK] Installed: ", paste(required_pkgs, collapse = ", "))
   }, error = function(e) {
     warning("Package installation issue: ", e$message, call. = FALSE)
     message("Try manual install:\n  pip install u-stats numpy torch")
@@ -142,15 +142,15 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
   ok <- check_python_env()
 
   if (ok) {
-    message("✓ Python and u_stats are ready")
+    message("[OK] Python and u_stats are ready")
 
     if (reticulate::py_module_available("torch")) {
-      message("✓ PyTorch available (recommended backend)")
+      message("[OK] PyTorch available (recommended backend)")
     } else {
-      message("⚠ PyTorch not detected — computations may be slower and less stable")
+      message("[WARN]PyTorch not detected -- computations may be slower and less stable")
     }
 
-    message("\n🎉 Setup complete! You can now call ustat().")
+    message("\n Setup complete! You can now call ustat().")
 
   } else {
     warning("Verification failed. A restart may be required.", call. = FALSE)
@@ -266,26 +266,26 @@ check_ustats_setup <- function() {
   py_ok <- tryCatch(reticulate::py_available(initialize = TRUE), error = function(e) FALSE)
 
   if (!py_ok) {
-    message("✗ Python not available")
+    message("[FAIL] Python not available")
     message("Run setup_ustats() to install dependencies.")
     return(invisible(FALSE))
   }
 
   py_config <- reticulate::py_config()
-  message("✓ Python: ", py_config$python)
+  message("[OK] Python: ", py_config$python)
   message("  Version: ", py_config$version)
 
   ustats_ok <- reticulate::py_module_available("u_stats")
   numpy_ok  <- reticulate::py_module_available("numpy")
   torch_ok  <- reticulate::py_module_available("torch")
 
-  message(if (ustats_ok) "✓ u_stats available" else "✗ u_stats missing")
-  message(if (numpy_ok)  "✓ NumPy available"  else "✗ NumPy missing")
+  message(if (ustats_ok) "[OK] u_stats available" else "[FAIL] u_stats missing")
+  message(if (numpy_ok)  "[OK] NumPy available"  else "[FAIL] NumPy missing")
 
   if (torch_ok) {
-    message("✓ PyTorch available (GPU acceleration & better numerical stability)")
+    message("[OK] PyTorch available (GPU acceleration & better numerical stability)")
   } else {
-    message("⚠ PyTorch not installed — computations may be slow and less stable")
+    message("[FAIL] PyTorch not installed -- computations may be slow and less stable")
   }
 
   message("\n---------------------------------")
@@ -294,11 +294,11 @@ check_ustats_setup <- function() {
   full_ok  <- basic_ok && torch_ok
 
   if (full_ok) {
-    message("🚀 Environment fully ready (Torch backend available)")
+    message(" Environment fully ready (Torch backend available)")
   } else if (basic_ok) {
-    message("✓ Basic environment ready, but Torch is strongly recommended")
+    message("[OK] Basic environment ready, but Torch is strongly recommended")
   } else {
-    message("✗ Setup incomplete. Run setup_ustats().")
+    message("[FAIL] Setup incomplete. Run setup_ustats().")
   }
 
   invisible(full_ok)

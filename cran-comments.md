@@ -25,26 +25,25 @@
 
 ## Test environments
 
-* Windows (R-devel, x86_64-w64-mingw32) via rhub
-* macOS arm64 / aarch64-apple-darwin23 (R-devel) via rhub
-* Linux Ubuntu 24.04 x86_64 (R-devel) via rhub
-* Linux Debian x86_64 (R-devel) via CRAN incoming pretest
+* Windows Server 2022 x64 (R-devel, x86_64-w64-mingw32) via win-builder
+* Windows (R-devel) via rhub
+* macOS arm64 and x86_64 (R-devel) via rhub
+* Linux Ubuntu x86_64 (R-devel) via rhub
 
 ## R CMD check results
 
-0 errors | 0 warnings | 2 notes
+0 errors | 0 warnings | 1 note
 
-### NOTE 1: New submission
+### NOTE: New submission
 
-This is the first submission of this package to CRAN.
+This is the first submission of this package to CRAN. This is the only
+NOTE reported by win-builder (R-devel) and rhub.
 
-### NOTE 2: Possibly misspelled words in DESCRIPTION: CUDA, NumPy, PyTorch
-
-These are not misspelled. 'NumPy', 'PyTorch' and 'CUDA' are established
-proper nouns referring to the NumPy scientific computing library
-(<https://numpy.org>), the PyTorch machine learning framework
-(<https://pytorch.org>) and NVIDIA's CUDA parallel computing platform
-respectively. All have been added to inst/WORDLIST.
+Depending on the spell-check dictionaries used, 'CUDA', 'NumPy' and
+'PyTorch' in the DESCRIPTION may additionally be flagged; these are
+established proper nouns (NVIDIA's CUDA platform, the NumPy library
+<https://numpy.org> and the PyTorch framework <https://pytorch.org>)
+and are listed in inst/WORDLIST.
 
 ## Comments on examples and tests
 

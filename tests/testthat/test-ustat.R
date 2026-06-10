@@ -53,8 +53,17 @@ has_ustats <- function() {
     reticulate::py_module_available("numpy")
 }
 
+skip_if_no_ustats <- function() {
+  # skip_on_cran() must come first: since the package declares its Python
+  # dependencies via reticulate::py_require(), py_available(initialize =
+  # TRUE) could otherwise trigger a large automatic download (Python +
+  # torch) on CRAN check machines.
+  testthat::skip_on_cran()
+  testthat::skip_if_not(has_ustats(), skip_msg)
+}
+
 test_that("ustat: basic matrix contraction with numpy backend", {
-  skip_if_not(has_ustats(), skip_msg)
+  skip_if_no_ustats()
 
   set.seed(42)
   H <- matrix(rnorm(100), 10, 10)
@@ -66,7 +75,7 @@ test_that("ustat: basic matrix contraction with numpy backend", {
 })
 
 test_that("ustat: expression as list produces same result as string", {
-  skip_if_not(has_ustats(), skip_msg)
+  skip_if_no_ustats()
 
   set.seed(42)
   H <- matrix(rnorm(100), 10, 10)
@@ -78,7 +87,7 @@ test_that("ustat: expression as list produces same result as string", {
 })
 
 test_that("ustat: average=FALSE returns larger value than average=TRUE", {
-  skip_if_not(has_ustats(), skip_msg)
+  skip_if_no_ustats()
 
   set.seed(1)
   H <- matrix(abs(rnorm(100)), 10, 10)  # positive entries
@@ -90,7 +99,7 @@ test_that("ustat: average=FALSE returns larger value than average=TRUE", {
 })
 
 test_that("ustat: dtype float32 vs float64 give close results", {
-  skip_if_not(has_ustats(), skip_msg)
+  skip_if_no_ustats()
 
   set.seed(7)
   H <- matrix(rnorm(100), 10, 10)
@@ -102,7 +111,7 @@ test_that("ustat: dtype float32 vs float64 give close results", {
 })
 
 test_that("ustat: errors on invalid dtype", {
-  skip_if_not(has_ustats(), skip_msg)
+  skip_if_no_ustats()
 
   H <- matrix(1:4, 2, 2)
   expect_error(
@@ -112,7 +121,7 @@ test_that("ustat: errors on invalid dtype", {
 })
 
 test_that("ustat: errors on non-numeric tensor", {
-  skip_if_not(has_ustats(), skip_msg)
+  skip_if_no_ustats()
 
   expect_error(
     ustat(list(matrix("a", 2, 2)), "ab->"),

@@ -6,17 +6,27 @@
 # Author: Xingyu Chen
 
 .onLoad <- function(libname, pkgname) {
-  # Initialize the package-level environment for state caching
-  # (e.g., Python availability checks)
-  assign("ustats_env", new.env(parent = emptyenv()), envir = asNamespace(pkgname))
-
-  # Optional: Set package options if needed
-  # options(ustats.verbose = TRUE)
+  # Declare the Python dependencies of this package. With reticulate
+  # (>= 1.41) these requirements are resolved automatically: the first
+  # time Python is initialized (e.g. on the first call to ustat()),
+  # reticulate provisions a cached ephemeral environment containing
+  # them, unless the user has already configured a Python environment
+  # (e.g. via RETICULATE_PYTHON, use_virtualenv(), or use_condaenv()).
+  #
+  # py_require() only records the requirements -- nothing is downloaded
+  # or installed at load time, so this is safe on CRAN check machines.
+  reticulate::py_require(c("u-stats", "numpy", "torch"))
+  reticulate::py_require(python_version = ">=3.11")
 
   invisible()
 }
 
-# .onAttach() - Optional: message on library(ustats)
+# .onAttach() - message on library(ustats)
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("ustats loaded. Use check_ustats_setup() to verify Python environment.")
+  packageStartupMessage(
+    "ustats: Python dependencies (u-stats, numpy, torch) are provisioned ",
+    "automatically on first use.\n",
+    "Run check_ustats_setup() to verify the environment, ",
+    "or see ?setup_ustats for manual setup."
+  )
 }

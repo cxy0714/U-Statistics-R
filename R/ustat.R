@@ -14,13 +14,11 @@
 #'
 #' @return A character string representing the Einstein summation expression.
 #'
-#' @keywords internal
-#'
 #' @examples
-#' \dontrun{
 #' expr_list_to_einstein(list(c(1, 2), c(2, 3), c(3, 4)))
 #' # Returns "ab,bc,cd->"
-#' }
+#'
+#' @noRd
 expr_list_to_einstein <- function(expr_list) {
   # Collect and SORT indices
   all_indices <- sort(unique(as.integer(unlist(expr_list))))
@@ -84,8 +82,12 @@ expr_list_to_einstein <- function(expr_list) {
 #'
 #' @details
 #' This function requires a working Python environment with the
-#' \code{u_stats} package installed. Use \code{setup_ustats()} to install
-#' dependencies and \code{check_ustats_setup()} to verify configuration.
+#' \code{u_stats} package installed. With \pkg{reticulate} (>= 1.41) the
+#' required Python packages are provisioned automatically the first time
+#' Python is used, so no manual setup is needed in most cases. To create a
+#' persistent environment instead (or to choose between the CPU-only and
+#' CUDA builds of PyTorch), use \code{setup_ustats()}; use
+#' \code{check_ustats_setup()} to verify the configuration.
 #'
 #' R numeric objects are converted to NumPy arrays using the selected
 #' precision. If Python tensors (e.g., Torch tensors) are supplied directly,
@@ -126,14 +128,15 @@ ustat <- function(tensors,
   if (backend == "torch" && !reticulate::py_module_available("torch")) {
     warning(
       "Torch backend not available; falling back to numpy.\n",
-      "Install torch with: reticulate::py_install('torch')",
+      "Install the CPU-only build with setup_ustats(), or manually:\n",
+      "  pip install torch --index-url https://download.pytorch.org/whl/cpu",
       call. = FALSE
     )
     backend <- "numpy"
   }
 
   ustat_mod <- tryCatch({
-    reticulate::import("u_stats", delay_load = TRUE)
+    reticulate::import("u_stats")
   }, error = function(e) {
     stop(
       "Failed to import u_stats module.\n",

@@ -7,6 +7,7 @@
 setup_ustats(
   method = c("auto", "virtualenv", "conda", "system"),
   envname = "r-ustats",
+  gpu = FALSE,
   restart = FALSE,
   persist = FALSE
 )
@@ -22,13 +23,24 @@ setup_ustats(
 
 \item{envname}{Name of the virtualenv/conda environment (default: \code{"r-ustats"})}
 
+\item{gpu}{Logical; if \code{FALSE} (default), install the CPU-only build
+of PyTorch from the official PyTorch wheel index
+(\verb{https://download.pytorch.org/whl/cpu}). The CPU build is much
+smaller (roughly 200 MB instead of more than 2 GB with bundled CUDA
+libraries on Linux) and is sufficient for machines without an NVIDIA
+GPU. Set \code{gpu = TRUE} to install the default PyPI build of
+PyTorch, which includes CUDA support on Linux; for GPU builds on
+Windows, or for a specific CUDA version, see
+\url{https://pytorch.org/get-started/locally/}.}
+
 \item{restart}{Logical; whether to restart the R session after setup}
 
 \item{persist}{Logical; whether to attempt persisting the configuration
 by adding RETICULATE_PYTHON to the project-level .Rprofile (default: FALSE)}
 }
 \value{
-Invisibly returns TRUE if setup completes
+Invisibly returns \code{TRUE} if setup completed and the
+environment verifies, \code{FALSE} otherwise.
 }
 \description{
 Installs and configures the Python environment required to run
@@ -36,12 +48,21 @@ Installs and configures the Python environment required to run
 \code{torch}.
 }
 \details{
+\strong{Most users do not need to call this function.} With
+\pkg{reticulate} (>= 1.41), the Python dependencies declared by this
+package are provisioned automatically in a cached environment the first
+time Python is used (e.g. on the first call to \code{ustat()}). Call
+\code{setup_ustats()} only if you prefer a persistent, dedicated
+environment, or if you want to control how PyTorch is installed (see
+the \code{gpu} argument).
+
 \strong{Note:} PyTorch is strongly recommended. The NumPy backend is slower
 and may be numerically less stable for higher-order U-statistics.
 }
 \examples{
 \dontrun{
-setup_ustats()
+setup_ustats()                # CPU-only PyTorch (small, default)
+setup_ustats(gpu = TRUE)      # default PyPI PyTorch (CUDA on Linux)
 setup_ustats(method = "conda", envname = "ustats-env")
 }
 }

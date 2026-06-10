@@ -1,0 +1,202 @@
+---
+title: "Getting started with ustats"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started with ustats}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+# Code chunks are not evaluated: the package requires a Python runtime
+# with u-stats / numpy / torch, which is not available (and should not
+# be downloaded) on the machines that build this vignette.
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  eval = FALSE
+)
+```
+
+`ustats` is a thin R interface to the Python package
+[`u-stats`](https://pypi.org/project/u-stats/), which computes
+higher-order U-statistics efficiently using Einstein summation
+(`numpy.einsum` / `torch.einsum`). This vignette covers the one part of
+the package that needs a little care — **setting up the Python
+environment** — and then shows basic usage.
+
+## TL;DR
+
+```{r}
+install.packages("ustats")
+library(ustats)
+
+H <- matrix(rnorm(100), 10, 10)
+ustat(list(H, H), "ab,bc->")
+```
+
+That is all most users need: on the first call, `reticulate` (>= 1.41)
+automatically downloads a private Python together with the required
+packages (`u-stats`, `numpy`, `torch`) into a cached environment, and
+reuses it in later sessions.
+
+## How the Python environment is resolved
+
+`ustats` declares its Python dependencies via
+`reticulate::py_require()` when the package is loaded. When Python is
+first needed, reticulate resolves these requirements as follows:
+
+1. If you have already configured a Python environment — via
+   `reticulate::use_virtualenv()`, `reticulate::use_condaenv()`, or the
+   `RETICULATE_PYTHON` environment variable — that environment is used.
+   It must contain `u-stats`, `numpy`, and (recommended) `torch`.
+2. Otherwise, reticulate provisions an **ephemeral, cached environment**
+   containing the declared packages automatically. Nothing is installed
+   into your system Python.
+
+There are therefore three ways to set things up, from least to most
+manual.
+
+### Option 1: automatic (recommended)
+
+Do nothing. The first call that touches Python triggers the automatic
+setup:
+
+```{r}
+library(ustats)
+ustat(list(matrix(rnorm(100), 10, 10)), "ab->")
+```
+
+Two things to know:
+
+* The first call downloads Python packages once; later calls and later
+  R sessions reuse the cache.
+* On Linux, the default PyTorch build from PyPI bundles CUDA libraries
+  (roughly 2.5 GB). If you do not have an NVIDIA GPU and prefer a small
+  CPU-only build (roughly 200 MB), use Option 2 — or, before Python
+  initializes, replace the declared requirement with a CPU-only one.
+
+### Option 2: a persistent environment with `setup_ustats()`
+
+`setup_ustats()` creates a dedicated environment and installs all
+dependencies into it. By default it installs the **CPU-only** PyTorch
+build:
+
+```{r}
+library(ustats)
+
+setup_ustats()                # virtualenv/conda + CPU-only torch
+setup_ustats(gpu = TRUE)      # default PyPI torch (CUDA-enabled on Linux)
+setup_ustats(
+  method  = "virtualenv",     # or "conda"
+  envname = "r-ustats",
+  persist = TRUE              # offer to pin RETICULATE_PYTHON in .Rprofile
+)
+```
+
+For GPU builds on Windows, or for a wheel matching a specific CUDA
+version, see <https://pytorch.org/get-started/locally/> and use
+Option 3.
+
+### Option 3: bring your own environment
+
+If you already maintain a conda or virtualenv environment (for example,
+one with a carefully chosen CUDA-enabled PyTorch), install the one
+missing piece:
+
+```bash
+pip install u-stats
+```
+
+and tell reticulate to use that environment **before Python
+initializes** (i.e. right after loading the package, before the first
+`ustat()` call):
+
+```{r}
+library(ustats)
+reticulate::use_condaenv("your_env_name", required = TRUE)
+# or: reticulate::use_virtualenv("~/.virtualenvs/your_env")
+```
+
+Alternatively, set `RETICULATE_PYTHON` to the path of the Python binary
+in `.Renviron` or `.Rprofile`, which takes effect for all sessions.
+
+### Verifying the setup
+
+```{r}
+check_ustats_setup()
+#> === ustats Environment Status ===
+#>
+#> [OK] Python: /path/to/python
+#>   Version: 3.12
+#> [OK] u_stats available
+#> [OK] NumPy available
+#> [OK] PyTorch available (version 2.5.1, CUDA available)
+#>
+#> ---------------------------------
+#>  Environment fully ready (Torch backend available)
+```
+
+## Computing U-statistics
+
+`ustat()` takes a list of kernel tensors (R vectors or matrices) and an
+Einstein summation expression describing how their indices are
+contracted, with distinct letters ranging over distinct observation
+indices:
+
+```{r}
+library(ustats)
+
+set.seed(1)
+n <- 300
+
+H1 <- rnorm(n)
+H2 <- matrix(rnorm(n * n), n, n)
+H3 <- rnorm(n)
+
+result <- ustat(
+  tensors    = list(H1, H2, H2, H3),
+  expression = "a,ab,bc,c->",
+  backend    = "torch",  # falls back to numpy if torch is unavailable
+  average    = TRUE,     # divide by the number of index tuples
+  dtype      = NULL      # auto: float32 on GPU, float64 on CPU
+)
+print(result)
+```
+
+The index structure can equivalently be given as a list of numeric
+index vectors, which is convenient when the expression is built
+programmatically:
+
+```{r}
+ustat(list(H1, H2, H2, H3), list(1, c(1, 2), c(2, 3), 3))
+```
+
+### GPU acceleration
+
+With `backend = "torch"`, computations run on the GPU automatically
+whenever PyTorch reports that CUDA is available:
+
+```{r}
+torch <- reticulate::import("torch")
+torch$cuda$is_available()
+```
+
+## Troubleshooting
+
+* **`check_ustats_setup()` reports a missing module.** The session is
+  bound to a Python environment that lacks the dependency. Either
+  install it there (`pip install u-stats`), or restart R and select a
+  different environment (Options 2-3 above).
+* **reticulate ignores `use_condaenv()` / `RETICULATE_PYTHON`.**
+  reticulate binds to a single Python per R session, at the moment
+  Python is first initialized. Restart R and configure the environment
+  *before* anything touches Python.
+* **The first call seems stuck.** It is most likely downloading
+  PyTorch; see Options 1-2 for how to choose the much smaller CPU-only
+  build.
+* **`ustat()` warns "Torch backend not available".** The bound
+  environment has no PyTorch; the computation falls back to NumPy,
+  which is slower and can be less numerically stable. Install torch
+  with `setup_ustats()` or
+  `pip install torch --index-url https://download.pytorch.org/whl/cpu`.

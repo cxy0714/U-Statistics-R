@@ -50,6 +50,14 @@ check_python_env <- function() {
 #' \code{ustat()}, including \code{u_stats}, \code{numpy}, and
 #' \code{torch}.
 #'
+#' \strong{Most users do not need to call this function.} With
+#' \pkg{reticulate} (>= 1.41), the Python dependencies declared by this
+#' package are provisioned automatically in a cached environment the first
+#' time Python is used (e.g. on the first call to \code{ustat()}). Call
+#' \code{setup_ustats()} only if you prefer a persistent, dedicated
+#' environment, or if you want to control how PyTorch is installed (see
+#' the \code{gpu} argument).
+#'
 #' \strong{Note:} PyTorch is strongly recommended. The NumPy backend is slower
 #' and may be numerically less stable for higher-order U-statistics.
 #'
@@ -61,20 +69,32 @@ check_python_env <- function() {
 #'     \item \code{"system"}: use system Python
 #'   }
 #' @param envname Name of the virtualenv/conda environment (default: \code{"r-ustats"})
+#' @param gpu Logical; if \code{FALSE} (default), install the CPU-only build
+#'   of PyTorch from the official PyTorch wheel index
+#'   (\verb{https://download.pytorch.org/whl/cpu}). The CPU build is much
+#'   smaller (roughly 200 MB instead of more than 2 GB with bundled CUDA
+#'   libraries on Linux) and is sufficient for machines without an NVIDIA
+#'   GPU. Set \code{gpu = TRUE} to install the default PyPI build of
+#'   PyTorch, which includes CUDA support on Linux; for GPU builds on
+#'   Windows, or for a specific CUDA version, see
+#'   \url{https://pytorch.org/get-started/locally/}.
 #' @param restart Logical; whether to restart the R session after setup
 #' @param persist Logical; whether to attempt persisting the configuration
 #'   by adding RETICULATE_PYTHON to the project-level .Rprofile (default: FALSE)
 #'
-#' @return Invisibly returns TRUE if setup completes
+#' @return Invisibly returns \code{TRUE} if setup completed and the
+#'   environment verifies, \code{FALSE} otherwise.
 #'
 #' @examples
 #' \dontrun{
-#' setup_ustats()
+#' setup_ustats()                # CPU-only PyTorch (small, default)
+#' setup_ustats(gpu = TRUE)      # default PyPI PyTorch (CUDA on Linux)
 #' setup_ustats(method = "conda", envname = "ustats-env")
 #' }
 #' @export
 setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
                          envname = "r-ustats",
+                         gpu = FALSE,
                          restart = FALSE,
                          persist = FALSE) {
 
@@ -133,14 +153,36 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
   # ----------------------------------------------------------
   message("\nInstalling required Python packages...")
 
-  required_pkgs <- c("u-stats", "numpy", "torch")
+  core_pkgs <- c("u-stats", "numpy")
 
   tryCatch({
-    reticulate::py_install(required_pkgs, pip = TRUE)
-    message("[OK] Installed: ", paste(required_pkgs, collapse = ", "))
+    reticulate::py_install(core_pkgs, pip = TRUE)
+    message("[OK] Installed: ", paste(core_pkgs, collapse = ", "))
   }, error = function(e) {
     warning("Package installation issue: ", e$message, call. = FALSE)
-    message("Try manual install:\n  pip install u-stats numpy torch")
+    message("Try manual install:\n  pip install u-stats numpy")
+  })
+
+  # PyTorch is installed separately: by default the CPU-only wheel index is
+  # used, because the default PyPI build bundles CUDA libraries on Linux
+  # (> 2 GB download) that are useless on machines without an NVIDIA GPU.
+  if (isTRUE(gpu)) {
+    message("Installing PyTorch (default PyPI build; includes CUDA on Linux)...")
+    torch_pip_options <- character()
+  } else {
+    message("Installing PyTorch (CPU-only build; use gpu = TRUE for CUDA)...")
+    torch_pip_options <- c("--index-url", "https://download.pytorch.org/whl/cpu")
+  }
+
+  tryCatch({
+    reticulate::py_install("torch", pip = TRUE, pip_options = torch_pip_options)
+    message("[OK] Installed: torch")
+  }, error = function(e) {
+    warning("PyTorch installation issue: ", e$message, call. = FALSE)
+    message(
+      "Try manual install:\n  pip install torch",
+      if (!isTRUE(gpu)) " --index-url https://download.pytorch.org/whl/cpu"
+    )
   })
 
   # ----------------------------------------------------------
@@ -159,13 +201,18 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
     if (reticulate::py_module_available("torch")) {
       message("[OK] PyTorch available (recommended backend)")
     } else {
-      message("[WARN]PyTorch not detected -- computations may be slower and less stable")
+      message("[WARN] PyTorch not detected -- computations may be slower and less stable")
     }
 
     message("\n Setup complete! You can now call ustat().")
 
   } else {
     warning("Verification failed. A restart may be required.", call. = FALSE)
+  }
+
+  # Persist configuration if requested and conditions are met
+  if (ok && method %in% c("virtualenv", "conda") && isTRUE(persist)) {
+    persist_project_config()
   }
 
   if (restart) {
@@ -178,10 +225,6 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
   }
 
   invisible(ok)
-  # Persist configuration if requested and conditions are met
-  if (ok && method %in% c("virtualenv", "conda") && isTRUE(persist)) {
-    persist_project_config()
-  }
 }
 
 persist_project_config <- function() {
@@ -263,7 +306,14 @@ persist_project_config <- function() {
 
 #' Check ustats Python Environment Status
 #'
-#' Reports whether Python and required modules for \code{ustat()} are available.
+#' Reports whether Python and required modules for \code{ustat()} are
+#' available, including the detected PyTorch version and whether CUDA
+#' (GPU acceleration) can be used.
+#'
+#' Note that with \pkg{reticulate} (>= 1.41), calling this function may
+#' initialize Python and trigger the automatic, one-time provisioning of
+#' the declared Python dependencies if no Python environment is configured
+#' yet (this can involve a sizeable download the first time).
 #'
 #' @return Invisibly returns TRUE if environment is ready
 #'
@@ -295,9 +345,20 @@ check_ustats_setup <- function() {
   message(if (numpy_ok)  "[OK] NumPy available"  else "[FAIL] NumPy missing")
 
   if (torch_ok) {
-    message("[OK] PyTorch available (GPU acceleration & better numerical stability)")
+    torch_info <- tryCatch({
+      torch <- reticulate::import("torch")
+      cuda_ok <- tryCatch(isTRUE(torch$cuda$is_available()),
+                          error = function(e) FALSE)
+      paste0("version ", torch$`__version__`,
+             if (cuda_ok) ", CUDA available" else ", CPU only")
+    }, error = function(e) NULL)
+
+    message("[OK] PyTorch available",
+            if (!is.null(torch_info)) paste0(" (", torch_info, ")"))
   } else {
     message("[FAIL] PyTorch not installed -- computations may be slow and less stable")
+    message("  Install it with setup_ustats(), or manually:")
+    message("    pip install torch --index-url https://download.pytorch.org/whl/cpu")
   }
 
   message("\n---------------------------------")

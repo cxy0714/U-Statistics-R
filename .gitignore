@@ -3,3 +3,8 @@
 .RData
 .Ruserdata
 CRAN-SUBMISSION
+inst/doc
+/doc/
+/Meta/
+vignettes/*.html
+vignettes/*.R

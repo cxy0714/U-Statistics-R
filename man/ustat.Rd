@@ -50,8 +50,12 @@ The U-statistic structure can be specified using either:
 }
 
 This function requires a working Python environment with the
-\code{u_stats} package installed. Use \code{setup_ustats()} to install
-dependencies and \code{check_ustats_setup()} to verify configuration.
+\code{u_stats} package installed. With \pkg{reticulate} (>= 1.41) the
+required Python packages are provisioned automatically the first time
+Python is used, so no manual setup is needed in most cases. To create a
+persistent environment instead (or to choose between the CPU-only and
+CUDA builds of PyTorch), use \code{setup_ustats()}; use
+\code{check_ustats_setup()} to verify the configuration.
 
 R numeric objects are converted to NumPy arrays using the selected
 precision. If Python tensors (e.g., Torch tensors) are supplied directly,

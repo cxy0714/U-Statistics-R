@@ -10,7 +10,15 @@ check_ustats_setup()
 Invisibly returns TRUE if environment is ready
 }
 \description{
-Reports whether Python and required modules for \code{ustat()} are available.
+Reports whether Python and required modules for \code{ustat()} are
+available, including the detected PyTorch version and whether CUDA
+(GPU acceleration) can be used.
+}
+\details{
+Note that with \pkg{reticulate} (>= 1.41), calling this function may
+initialize Python and trigger the automatic, one-time provisioning of
+the declared Python dependencies if no Python environment is configured
+yet (this can involve a sizeable download the first time).
 }
 \examples{
 \dontrun{

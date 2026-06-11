@@ -1,3 +1,12 @@
+# ustats 0.1.5
+
+* The DESCRIPTION now cites the paper describing the implemented
+  methods: Chen, Zhang, and Liu (2025) <doi:10.48550/arXiv.2508.12627>.
+* `setup_ustats(persist = TRUE)` no longer offers to write to the
+  project `.Rprofile`. It now only prints the `RETICULATE_PYTHON` line
+  for the user to add manually, so the package never writes to the
+  user's file space (CRAN policy).
+
 # ustats 0.1.4
 
 ## Python environment handling

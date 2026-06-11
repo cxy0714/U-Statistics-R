@@ -35,8 +35,10 @@ Windows, or for a specific CUDA version, see
 
 \item{restart}{Logical; whether to restart the R session after setup}
 
-\item{persist}{Logical; whether to attempt persisting the configuration
-by adding RETICULATE_PYTHON to the project-level .Rprofile (default: FALSE)}
+\item{persist}{Logical; if \code{TRUE}, print the
+\code{RETICULATE_PYTHON} configuration line that you can add to your
+\code{.Rprofile} yourself to make the environment persist across
+sessions. The function never writes to your files (default: FALSE)}
 }
 \value{
 Invisibly returns \code{TRUE} if setup completed and the

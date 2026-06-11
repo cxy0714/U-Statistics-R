@@ -90,8 +90,8 @@ setup_ustats(gpu = TRUE)      # default PyPI torch (CUDA-enabled on Linux)
 setup_ustats(
   method  = "virtualenv",     # or "conda"
   envname = "r-ustats",
-  persist = TRUE              # offer to pin RETICULATE_PYTHON in .Rprofile
-)
+  persist = TRUE              # print the RETICULATE_PYTHON line to add
+)                             # to your .Rprofile (no files are written)
 ```
 
 For GPU builds on Windows, or for a wheel matching a specific CUDA

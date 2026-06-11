@@ -1,7 +1,7 @@
 Package: ustats
 Type: Package
 Title: R Interface to Python Tools for Computing Higher-Order U-Statistics
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: c(
     person("Xingyu", "Chen",
            email = "xingyuchen0714@sjtu.edu.cn",
@@ -15,7 +15,9 @@ Authors@R: c(
   )
 Description: Provides an R interface to the Python package 'u-stats'
     <https://pypi.org/project/u-stats/> for efficient computation of
-    higher-order U-statistics using Einstein summation notation. The
+    higher-order U-statistics using Einstein summation notation,
+    implementing the methods of Chen, Zhang, and Liu (2025)
+    <doi:10.48550/arXiv.2508.12627>. The
     package automatically converts R objects to 'NumPy' or 'PyTorch'
     tensors via 'reticulate' and supports GPU acceleration when 'PyTorch'
     with 'CUDA' is available. Python dependencies are declared via

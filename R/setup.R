@@ -79,8 +79,10 @@ check_python_env <- function() {
 #'   Windows, or for a specific CUDA version, see
 #'   \url{https://pytorch.org/get-started/locally/}.
 #' @param restart Logical; whether to restart the R session after setup
-#' @param persist Logical; whether to attempt persisting the configuration
-#'   by adding RETICULATE_PYTHON to the project-level .Rprofile (default: FALSE)
+#' @param persist Logical; if \code{TRUE}, print the
+#'   \code{RETICULATE_PYTHON} configuration line that you can add to your
+#'   \code{.Rprofile} yourself to make the environment persist across
+#'   sessions. The function never writes to your files (default: FALSE)
 #'
 #' @return Invisibly returns \code{TRUE} if setup completed and the
 #'   environment verifies, \code{FALSE} otherwise.
@@ -210,9 +212,11 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
     warning("Verification failed. A restart may be required.", call. = FALSE)
   }
 
-  # Persist configuration if requested and conditions are met
+  # Show how to persist the configuration if requested. We deliberately
+  # only print instructions and never write to the user's files
+  # (e.g. .Rprofile), in line with CRAN policy.
   if (ok && method %in% c("virtualenv", "conda") && isTRUE(persist)) {
-    persist_project_config()
+    print_persist_instructions()
   }
 
   if (restart) {
@@ -227,80 +231,29 @@ setup_ustats <- function(method = c("auto", "virtualenv", "conda", "system"),
   invisible(ok)
 }
 
-persist_project_config <- function() {
-  # Get the current Python executable path (reliable after use_*())
-  py_path <- normalizePath(reticulate::py_config()$python, winslash = "/", mustWork = TRUE)
-
-  # Project-level .Rprofile (in current working directory)
-  project_rprofile <- file.path(getwd(), ".Rprofile")
-
-  # Avoid writing if current directory is home or root (safety check)
-  home_dir <- normalizePath(Sys.getenv("HOME"), winslash = "/")
-  if (identical(normalizePath(getwd(), winslash = "/"), home_dir)) {
-    message("Current working directory is home directory. Skipping project-level .Rprofile write.")
-    message("To persist, manually add to ~/.Rprofile:")
-    message(sprintf('Sys.setenv(RETICULATE_PYTHON = "%s")', py_path))
+# Print (never write!) the configuration line that makes the selected
+# Python environment persistent. CRAN policy forbids writing to the
+# user's home filespace (including getwd()) by default, so the user is
+# asked to add the line to their .Rprofile themselves.
+print_persist_instructions <- function() {
+  py_path <- tryCatch(
+    normalizePath(reticulate::py_config()$python, winslash = "/", mustWork = FALSE),
+    error = function(e) NULL
+  )
+  if (is.null(py_path)) {
     return(invisible())
   }
 
-  # Non-interactive session: skip automatic write
-  if (!interactive()) {
-    message("Non-interactive session. Skipping automatic .Rprofile write.")
-    message(sprintf("Manually add to .Rprofile in this project:\nSys.setenv(RETICULATE_PYTHON = \"%s\")", py_path))
-    return(invisible())
-  }
-
-  # Ask user for confirmation
-  cat("\nSetup successful! Would you like to make this Python environment persistent for the current project?\n")
-  cat("This will add a line to .Rprofile in the current working directory.\n")
-  choice <- utils::menu(
-    c("Yes, add to project .Rprofile", "No, skip"),
-    title = "Persist configuration?"
+  message(
+    "\nTo make this Python environment persistent across R sessions,\n",
+    "add the following line to your .Rprofile",
+    " (e.g. open it with usethis::edit_r_profile()):\n\n",
+    sprintf('  Sys.setenv(RETICULATE_PYTHON = "%s")\n\n', py_path),
+    "ustats does not modify any of your files; this is a manual step.\n",
+    "Restart R afterwards for the change to take effect."
   )
 
-  if (choice != 1L) {
-    message("Skipping persistence. You can manually add:")
-    message(sprintf('  Sys.setenv(RETICULATE_PYTHON = "%s")', py_path))
-    return(invisible())
-  }
-
-  # Backup existing file if it exists
-  if (file.exists(project_rprofile)) {
-    backup_path <- sprintf("%s.bak-%s", project_rprofile, format(Sys.time(), "%Y%m%d-%H%M%S"))
-    file.copy(project_rprofile, backup_path)
-    message(sprintf("Backed up existing .Rprofile to: %s", basename(backup_path)))
-  }
-
-  # Read existing lines or start empty
-  if (file.exists(project_rprofile)) {
-    lines <- readLines(project_rprofile, warn = FALSE)
-  } else {
-    lines <- character()
-  }
-
-  # Comment out any previous RETICULATE_PYTHON lines to avoid conflicts
-  lines <- gsub(
-    "^[[:space:]]*Sys\\.setenv\\([[:space:]]*RETICULATE_PYTHON.*$",
-    "# \\0   # commented by ustats setup (previous setting)",
-    lines
-  )
-
-  # Append new configuration with clear comments
-  new_lines <- c(
-    lines,
-    "",
-    "# === ustats configuration: persistent Python environment ===",
-    paste0("# Added by setup_ustats() on ", format(Sys.time(), "%Y-%m-%d %H:%M:%S")),
-    sprintf('Sys.setenv(RETICULATE_PYTHON = "%s")', py_path),
-    "# This ensures reticulate uses the dedicated environment for ustats (with torch, etc.)",
-    "# To change or disable: comment out or delete this line",
-    "# ====================================================="
-  )
-
-  # Write to file
-  writeLines(new_lines, project_rprofile)
-  message(sprintf("\nSuccessfully added configuration to project .Rprofile: %s", project_rprofile))
-  message("Please restart R / RStudio for the change to take effect in new sessions.")
+  invisible(py_path)
 }
 
 

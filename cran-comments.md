@@ -27,7 +27,7 @@
 
 * Windows Server 2022 x64 (R-devel, x86_64-w64-mingw32) via win-builder
 * Windows (R-devel) via rhub
-* macOS arm64 and x86_64 (R-devel) via rhub
+* macOS arm64 (R-devel) via rhub
 * Linux Ubuntu x86_64 (R-devel) via rhub
 
 ## R CMD check results

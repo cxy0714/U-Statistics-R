@@ -25,7 +25,7 @@ higher-order U-statistics efficiently using Einstein summation
 the package that needs a little care — **setting up the Python
 environment** — and then shows basic usage.
 
-## TL;DR
+## Quick start
 
 ```{r}
 install.packages("ustats")

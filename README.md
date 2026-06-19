@@ -1,5 +1,11 @@
 # ustats (R Package)
 
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/ustats)](https://CRAN.R-project.org/package=ustats)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/ustats)](https://CRAN.R-project.org/package=ustats)
+[![R-CMD-check](https://github.com/cxy0714/U-Statistics-R/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/cxy0714/U-Statistics-R/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 `ustats` provides an R interface to the Python package [`u-stats`](https://pypi.org/project/u-stats/) for computing **higher-order U-statistics** efficiently. Heavy numerical computation is handled in Python (via [`numpy.einsum`](https://numpy.org/doc/stable/reference/generated/numpy.einsum.html) and [`torch.einsum`](https://pytorch.org/docs/stable/generated/torch.einsum.html)), while R serves as a convenient front-end for data handling and statistical workflows.
 
 ---

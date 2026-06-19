@@ -1,0 +1,33 @@
+# Citation information for the 'ustats' package.
+# `meta` is supplied by utils::citation(); guard for direct readCitationFile().
+if (!exists("meta") || is.null(meta)) meta <- packageDescription("ustats")
+ver <- meta$Version
+if (is.null(ver)) ver <- "development version"
+
+citHeader(
+  "To cite the 'ustats' package in publications, please cite both the ",
+  "paper describing the implemented methods and the package itself:"
+)
+
+bibentry(
+  bibtype      = "Misc",
+  title        = "On Computing and the Complexity of Computing Higher-Order {U}-Statistics, Exactly",
+  author       = c(person("Xingyu", "Chen"),
+                   person("Ruiqi", "Zhang"),
+                   person("Lin", "Liu")),
+  year         = "2025",
+  note         = "arXiv preprint arXiv:2508.12627",
+  doi          = "10.48550/arXiv.2508.12627",
+  url          = "https://arxiv.org/abs/2508.12627"
+)
+
+bibentry(
+  bibtype = "Manual",
+  title   = "{ustats}: R Interface to Python Tools for Computing Higher-Order U-Statistics",
+  author  = c(person("Xingyu", "Chen"),
+              person("Ruiqi", "Zhang"),
+              person("Lin", "Liu")),
+  year    = "2025",
+  note    = paste0("R package version ", ver),
+  url     = "https://CRAN.R-project.org/package=ustats"
+)

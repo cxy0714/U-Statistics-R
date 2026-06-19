@@ -1,3 +1,12 @@
+# ustats (development version)
+
+* Added a `CITATION` file: `citation("ustats")` now returns both the
+  package reference and the paper describing the implemented methods
+  (Chen, Zhang, and Liu, 2025, <doi:10.48550/arXiv.2508.12627>).
+* Added a package-level help page, accessible via `?ustats` or
+  `package?ustats`, summarising the package and linking to its
+  documentation site.
+
 # ustats 0.1.5
 
 * The DESCRIPTION now cites the paper describing the implemented

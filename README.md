@@ -17,8 +17,8 @@ The underlying Python implementation is the PyPI package [`u-stats`](https://pyp
 ## Installation
 
 ```r
-# From CRAN (once accepted):
-# install.packages("ustats")
+# From CRAN:
+install.packages("ustats")
 
 # Development version from GitHub:
 # install.packages("devtools")
